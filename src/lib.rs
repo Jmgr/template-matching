@@ -146,7 +146,9 @@ impl TemplateMatcher {
     pub fn new() -> Self {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
+            flags: Default::default(),
             dx12_shader_compiler: Default::default(),
+            gles_minor_version: wgpu::Gles3MinorVersion::Automatic,
         });
 
         let adapter = pollster::block_on(async {
@@ -165,8 +167,9 @@ impl TemplateMatcher {
                 .request_device(
                     &wgpu::DeviceDescriptor {
                         label: None,
-                        features: wgpu::Features::empty(),
-                        limits: wgpu::Limits::default(),
+                        required_features: Default::default(),
+                        required_limits: Default::default(),
+                        memory_hints: Default::default(),
                     },
                     None,
                 )
@@ -320,6 +323,8 @@ impl TemplateMatcher {
                     layout: Some(&self.pipeline_layout),
                     module: &self.shader,
                     entry_point,
+                    compilation_options: Default::default(),
+                    cache: Default::default(),
                 },
             ));
         }
@@ -434,6 +439,7 @@ impl TemplateMatcher {
         {
             let mut compute_pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                 label: Some("compute_pass"),
+                timestamp_writes: Default::default(),
             });
             compute_pass.set_pipeline(self.last_pipeline.as_ref().unwrap());
             compute_pass.set_bind_group(0, self.bind_group.as_ref().unwrap(), &[]);
